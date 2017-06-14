@@ -8,7 +8,8 @@ CFLAGS=	-mcpu=cortex-m4 	\
 	-mfpu=fpv4-sp-d16	\
 	-mthumb 		\
 	-fdata-sections 	\
-	-ffunction-sections
+	-ffunction-sections     \
+	-lgcc_eh
 
 LDFLAGS=-gc-sections
 
@@ -21,7 +22,7 @@ HDRDIR=inc
 OBJDIR=obj
 
 SRC=$(addprefix $(SRCDIR)/, main.c stm32f4xx_rcc.c stm32f4xx_gpio.c \
-    stm32f4xx_exti.c stm32f4xx_syscfg.c misc.c)
+    stm32f4xx_exti.c stm32f4xx_syscfg.c misc.c i2c1.c stm32f4xx_i2c.c)
 OBJ=$(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o, $(SRC))
 BIN=bin
 
