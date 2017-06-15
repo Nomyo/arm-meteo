@@ -1,11 +1,12 @@
 #include <stm32f4xx_syscfg.h>
 #include <stm32f4xx_exti.h>
-#include <misc.h>
-
 #include <stm32f4xx_rcc.h>
-#include <i2c1.h>
 #include <stm32f4xx_gpio.h>
 
+#include <i2c1.h>
+#include <misc.h>
+
+#include <time.h>
 
 #undef errno
 extern int errno;
@@ -15,12 +16,8 @@ void _exit(int ret)
   while (1);
 }
 
-#define LEDG                            GPIO_Pin_13
-#define LEDB                            GPIO_Pin_14
-
 void ButtonInit(void)
 {
-
   // Init GPIO
   GPIO_InitTypeDef GPIO_InitStruct;
   //EXTI structure to init EXT
@@ -73,24 +70,12 @@ void LEDsInit(void)
   GPIO_Init(GPIOG, &GPIO_InitDef);
 }
 
-void LEDToggle(unsigned int LEDn)
-{
-  if(GPIO_ReadOutputDataBit(GPIOG, LEDn))  //read previous state
-  {
-    GPIO_ResetBits(GPIOG, LEDn); //set to zero
-  }
-  else
-  {
-    GPIO_SetBits(GPIOG, LEDn);//set to one
-  }
-}
-
 void EXTI0_IRQHandler(void)
 {
   //Check if EXTI_Line0 is asserted
   if(EXTI_GetITStatus(EXTI_Line0) != RESET)
   {
-    LEDToggle(LEDG);
+    LEDToggle(GPIO_Pin_13);
   }
 
   //we need to clear line pending bit manually
@@ -99,7 +84,7 @@ void EXTI0_IRQHandler(void)
 
 void SysTick_Handler(void)
 {
-  LEDToggle(LEDG);
+  LEDToggle(GPIO_Pin_13);
 }
 
 void SysTick_Init(void)
@@ -112,31 +97,30 @@ int main()
 {
   LEDsInit();
   ButtonInit();
-  SysTick_Init();
+
+  timer_t timer;
+  //TimerInit(&timer);
+
+
+  //SysTick_Init();
 
   init_I2C1(); // initialize I2C peripheral
 
   uint8_t received_data[2];
 
-  /************************************************************************
-   * while(1)								  *
-   * {									  *
-   *   // start a transmission in Master transmitter mode		  *
-   *   I2C_start(I2C1, SLAVE_ADDRESS<<1, I2C_Direction_Transmitter);	  *
-   *   // write one byte to the slave					  *
-   *   I2C_write(I2C1, 0x20);						  *
-   *   // write another byte to the slave				  *
-   *   I2C_write(I2C1, 0x03);						  *
-   *   // stop the transmission						  *
-   *   I2C_stop(I2C1);							  *
-   *   // start a transmission in Master receiver mode			  *
-   *   I2C_start(I2C1, SLAVE_ADDRESS<<1, I2C_Direction_Receiver);	  *
-   *   // read one byte and request another byte			  *
-   *   received_data[0] = I2C_read_ack(I2C1);				  *
-   *   // read one byte and don't request another byte, stop transmission *
-   *   received_data[1] = I2C_read_nack(I2C1);				  *
-   * }									  *
-   ************************************************************************/
+  while(1)
+  {
+    // start a transmission in Master transmitter mode
+    I2C_start(I2C1, 0x77 << 1, I2C_Direction_Transmitter);
+    // write one byte to the slave
+    I2C_write(I2C1, 0xD0); // CHIP REGISTER => 0x60
+    // stop the transmission
+    I2C_stop(I2C1);
+    // start a transmission in Master receiver mode
+    I2C_start(I2C1, 0x77 << 1, I2C_Direction_Receiver);
+    // read one byte and request another byte
+    received_data[0] = I2C_read_nack(I2C1);
+  }
 
   while (1);
 }

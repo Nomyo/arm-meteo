@@ -4,7 +4,6 @@
 
 void init_I2C1(void)
 {
-
   GPIO_InitTypeDef GPIO_InitStruct;
   I2C_InitTypeDef I2C_InitStruct;
 
@@ -31,7 +30,7 @@ void init_I2C1(void)
   I2C_InitStruct.I2C_OwnAddress1 = 0x00;
 
   // disable acknowledge when reading (can be changed later on)
-  I2C_InitStruct.I2C_Ack = I2C_Ack_Disable;
+  I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
   // set address length to 7 bit addresses
   I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
   I2C_Init(I2C1, &I2C_InitStruct);
@@ -39,10 +38,25 @@ void init_I2C1(void)
   I2C_Cmd(I2C1, ENABLE);
 }
 
+void OnTimeout_GetFlagStatus(void)
+{
+  // Reset I2C
+  I2C_DeInit(I2C1);
+  init_I2C1();
+}
 
-void I2C_start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction){
+void I2C_start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction)
+{
   // wait until I2C1 is not busy anymore
-  while(I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY));
+  long timer = BUSY_BUS_TIME;
+  while(I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
+  {
+    if (--timer <= 0)
+    {
+      OnTimeout_GetFlagStatus();
+      timer = BUSY_BUS_TIME;
+    }
+  }
 
   // Send I2C1 START condition
   I2C_GenerateSTART(I2Cx, ENABLE);
@@ -58,10 +72,12 @@ void I2C_start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction){
    * Master receiver mode, depending on the transmission
    * direction
    */
-  if(direction == I2C_Direction_Transmitter){
+  if(direction == I2C_Direction_Transmitter)
+  {
     while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
   }
-  else if(direction == I2C_Direction_Receiver){
+  else if(direction == I2C_Direction_Receiver)
+  {
     while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED));
   }
 }
@@ -73,24 +89,30 @@ void I2C_write(I2C_TypeDef* I2Cx, uint8_t data)
   while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
 }
 
-uint8_t I2C_read_ack(I2C_TypeDef* I2Cx){
+uint8_t I2C_read_ack(I2C_TypeDef* I2Cx)
+{
   // enable acknowledge of recieved data
   I2C_AcknowledgeConfig(I2Cx, ENABLE);
+
   // wait until one byte has been received
-  while( !I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED) );
+  while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED));
+
   // read data from I2C data register and return data byte
   uint8_t data = I2C_ReceiveData(I2Cx);
   return data;
 }
 
-uint8_t I2C_read_nack(I2C_TypeDef* I2Cx){
-  // disabe acknowledge of received data
+uint8_t I2C_read_nack(I2C_TypeDef* I2Cx)
+{
+  // disable acknowledge of received data
   // nack also generates stop condition after last byte received
   // see reference manual for more info
   I2C_AcknowledgeConfig(I2Cx, DISABLE);
   I2C_GenerateSTOP(I2Cx, ENABLE);
+
   // wait until one byte has been received
-  while( !I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED) );
+  while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED));
+
   // read data from I2C data register and return data byte
   uint8_t data = I2C_ReceiveData(I2Cx);
   return data;

@@ -1,8 +1,7 @@
 #include <stm32f4xx.h>
 #include <stm32f4xx_i2c.h>
 
-
-#define SLAVE_ADDRESS 0x77 // the slave address (example)
+#define BUSY_BUS_TIME 100000
 
 void init_I2C1(void);
 
