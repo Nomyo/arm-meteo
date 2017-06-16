@@ -22,9 +22,31 @@ SRCDIR=src
 HDRDIR=inc
 OBJDIR=obj
 
-SRC=$(addprefix $(SRCDIR)/, main.c stm32f4xx_rcc.c stm32f4xx_gpio.c \
-    stm32f4xx_exti.c stm32f4xx_syscfg.c misc.c i2c1.c stm32f4xx_i2c.c led.c \
-    )
+SRC=$(addprefix $(SRCDIR)/,      \
+    main.c                       \
+    stm32f4xx_rcc.c              \
+    stm32f4xx_gpio.c             \
+    stm32f4xx_exti.c             \
+    stm32f4xx_syscfg.c           \
+    stm32f4xx_spi.c              \
+    stm32f4xx_fmc.c              \
+    stm32f4xx_ltdc.c             \
+    stm32f4xx_dma2d.c            \
+    stm32f4xx_tim.c              \
+    misc.c                       \
+    i2c1.c                       \
+    stm32f4xx_i2c.c              \
+    led.c                        \
+    timer.c                      \
+    button.c                     \
+    systick.c                    \
+    fonts.c                      \
+    stm32f429i_discovery.c       \
+    stm32f429i_discovery_sdram.c \
+    stm32f429i_discovery_lcd.c   \
+    stm32f429i_discovery_ioe.c   \
+    ltd.c)
+
 OBJ=$(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o, $(SRC))
 BIN=bin
 

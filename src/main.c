@@ -2,125 +2,103 @@
 #include <stm32f4xx_exti.h>
 #include <stm32f4xx_rcc.h>
 #include <stm32f4xx_gpio.h>
+#include <stm32f429i_discovery.h>
+#include <stm32f429i_discovery_lcd.h>
 
 #include <i2c1.h>
 #include <misc.h>
-
 #include <time.h>
+#include <systick.h>
+#include <timer.h>
+#include <button.h>
+#include <led.h>
 
 #undef errno
 extern int errno;
+
+void LCD_Config(void);
+void LCD_AF_GPIOConfig(void);
+void delay(__IO uint32_t nCount);
 
 void _exit(int ret)
 {
   while (1);
 }
 
-void ButtonInit(void)
-{
-  // Init GPIO
-  GPIO_InitTypeDef GPIO_InitStruct;
-  //EXTI structure to init EXT
-  EXTI_InitTypeDef EXTI_InitStructure;
-  //NVIC structure to set up NVIC controller
-  NVIC_InitTypeDef NVIC_InitStructure;
-
-  /* Enable clock for GPIOA */
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-  /* Enable clock for SYSCFG */
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-
-  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN;
-  GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0;
-  GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
-  GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
-  GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  //Connect EXTI Line to Button Pin
-  SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
-
-  //Configure Button EXTI line
-  EXTI_InitStructure.EXTI_Line = EXTI_Line0;
-  //select interrupt mode
-  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-  //generate interrupt on rising edge
-  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
-  //enable EXTI line
-  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-  //send values to registers
-  EXTI_Init(&EXTI_InitStructure);
-
-  NVIC_EnableIRQ(EXTI0_IRQn); // Enable interrupt
-}
-
-void LEDsInit(void)
-{
-  //GPIO structure used to initialize LED port
-  GPIO_InitTypeDef GPIO_InitDef;
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);
-
-  GPIO_InitDef.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14;
-  GPIO_InitDef.GPIO_Mode = GPIO_Mode_OUT;
-  GPIO_InitDef.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitDef.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_InitDef.GPIO_Speed = GPIO_Speed_100MHz;
-
-  //Initialize pins
-  GPIO_Init(GPIOG, &GPIO_InitDef);
-}
-
-void EXTI0_IRQHandler(void)
-{
-  //Check if EXTI_Line0 is asserted
-  if(EXTI_GetITStatus(EXTI_Line0) != RESET)
-  {
-    LEDToggle(GPIO_Pin_13);
-  }
-
-  //we need to clear line pending bit manually
-  EXTI_ClearITPendingBit(EXTI_Line0);
-}
-
-void SysTick_Handler(void)
-{
-  LEDToggle(GPIO_Pin_13);
-}
-
-void SysTick_Init(void)
-{
-  SysTick_Config(10000000);
-  NVIC_EnableIRQ(SysTick_IRQn);
-}
-
 int main()
 {
   LEDsInit();
   ButtonInit();
+  TimerInit();
 
-  timer_t timer;
+  while(1);
+
   //TimerInit(&timer);
-
-
   //SysTick_Init();
 
-  init_I2C1(); // initialize I2C peripheral
+  // I2C PART :
+  /************************************************************
+   * init_I2C1(); // initialize I2C peripheral		      *
+   * uint8_t received_data[2];				      *
+   * 							      *
+   * while(1)						      *
+   * {							      *
+   *   // start a transmission in Master transmitter mode     *
+   *   I2C_start(I2C1, 0x77 << 1, I2C_Direction_Transmitter); *
+   *   // write one byte to the slave			      *
+   *   I2C_write(I2C1, 0xD0); // CHIP REGISTER => 0x60	      *
+   *   // stop the transmission				      *
+   *   I2C_stop(I2C1);					      *
+   *   // start a transmission in Master receiver mode	      *
+   *   I2C_start(I2C1, 0x77 << 1, I2C_Direction_Receiver);    *
+   *   // read one byte and request another byte	      *
+   *   received_data[0] = I2C_read_nack(I2C1);		      *
+   * }							      *
+   ************************************************************/
 
-  uint8_t received_data[2];
+  /* LCD initialization */
+  /******************************************************************************************
+   * LCD_Init();									    *
+   * /\* LCD Layer initialization *\/							    *
+   * LCD_LayerInit();									    *
+   * 											    *
+   * // Enable Layer1									    *
+   * //LTDC_LayerCmd(LTDC_Layer1, ENABLE);						    *
+   * //LTDC_LayerCmd(LTDC_Layer2, DISABLE);						    *
+   * //LTDC_ReloadConfig(LTDC_IMReload);						    *
+   * 											    *
+   * /\* Enable the LTDC *\/								    *
+   * LTDC_Cmd(ENABLE);									    *
+   * 											    *
+   * LCD_SetLayer(LCD_FOREGROUND_LAYER);						    *
+   * // Dokunmatik panel ayarlari							    *
+   * TP_Config();									    *
+   * // Baslangiçta tanitim yazisini göster						    *
+   * LCD_SetFont(&Font16x24);								    *
+   * 											    *
+   * LCD_SetTextColor(LCD_COLOR_BLACK);							    *
+   * LCD_DisplayStringLine (LINE(0),(uint8_t*)"Direnc Renk Kod");// Direnç yazisini temizle *
+   * LCD_DisplayStringLine (LINE(1),(uint8_t*)"  Hesaplayici  ");// 2. rengi temizle	    *
+   * LCD_DisplayStringLine (LINE(2),(uint8_t*)"     V1.0      ");// 3. rengi temzile	    *
+   * LCD_DisplayStringLine (LINE(3),(uint8_t*)" Erhan YILMAZ  ");// 4. rengi temizle	    *
+   * int i;										    *
+   * for(i=100000000; i>0;i--);								    *
+   * for(i=0;i<4;i++)									    *
+   *   LCD_ClearLine(LINE(i));								    *
+   * 											    *
+   * while (1);										    *
+   * char *text = "totoi";								    *
+   * while (1)										    *
+   * {											    *
+   *   //char a = 'a';									    *
+   *   //LCD_DisplayStringLine(LINE(4), (uint8_t*)text);				    *
+   *   LCD_SetFont(&Font8x8);								    *
+   *   LCD_SetTextColor(LCD_COLOR_CYAN);						    *
+   *   LCD_DisplayStringLine(LINE(23), (uint8_t*)text);					    *
+   *   delay(100000);									    *
+   * }											    *
+   ******************************************************************************************/
 
-  while(1)
-  {
-    // start a transmission in Master transmitter mode
-    I2C_start(I2C1, 0x77 << 1, I2C_Direction_Transmitter);
-    // write one byte to the slave
-    I2C_write(I2C1, 0xD0); // CHIP REGISTER => 0x60
-    // stop the transmission
-    I2C_stop(I2C1);
-    // start a transmission in Master receiver mode
-    I2C_start(I2C1, 0x77 << 1, I2C_Direction_Receiver);
-    // read one byte and request another byte
-    received_data[0] = I2C_read_nack(I2C1);
-  }
 
   while (1);
 }
@@ -182,7 +160,7 @@ __attribute__((section (".isr_vector"))) const int isr_table[] =
   (int) dummy_handler,                   //TIM1_UP_TIM10_IRQn          = 25,
   (int) dummy_handler,                   //TIM1_TRG_COM_TIM11_IRQn     = 26,
   (int) dummy_handler,                   //TIM1_CC_IRQn                = 27,
-  (int) dummy_handler,                   //TIM2_IRQn                   = 28,
+  (int) TIM2_IRQHandler,                 //TIM2_IRQn                   = 28,
   (int) dummy_handler,                   //TIM3_IRQn                   = 29,
   (int) dummy_handler,                   //TIM4_IRQn                   = 30,
   (int) dummy_handler,                   //I2C1_EV_IRQn                = 31,
