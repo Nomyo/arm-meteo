@@ -34,13 +34,15 @@ SRC=$(addprefix $(SRCDIR)/,      \
     stm32f4xx_dma2d.c            \
     stm32f4xx_tim.c              \
     misc.c                       \
-    i2c1.c                       \
     stm32f4xx_i2c.c              \
+    i2c1.c \
     led.c                        \
     timer.c                      \
     button.c                     \
     systick.c                    \
     fonts.c                      \
+    bme280.c                     \
+    stm32f4xx_usart.c            \
     stm32f429i_discovery.c       \
     stm32f429i_discovery_sdram.c \
     stm32f429i_discovery_lcd.c   \

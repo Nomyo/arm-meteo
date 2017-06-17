@@ -49,7 +49,7 @@ void I2C_start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction)
 {
   // wait until I2C1 is not busy anymore
   long timer = BUSY_BUS_TIME;
-  while(I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
+  while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
   {
     if (--timer <= 0)
     {

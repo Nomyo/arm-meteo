@@ -12,10 +12,12 @@
 #include <timer.h>
 #include <button.h>
 #include <led.h>
+#include <bme280.h>
 
 #undef errno
 extern int errno;
 
+extern sFONT *LCD_Currentfonts;
 void LCD_Config(void);
 void LCD_AF_GPIOConfig(void);
 void delay(__IO uint32_t nCount);
@@ -31,76 +33,41 @@ int main()
   ButtonInit();
   TimerInit();
 
-  while(1);
+  init_I2C1();
 
-  //TimerInit(&timer);
-  //SysTick_Init();
+  struct BME280 bme;
 
-  // I2C PART :
-  /************************************************************
-   * init_I2C1(); // initialize I2C peripheral		      *
-   * uint8_t received_data[2];				      *
-   * 							      *
-   * while(1)						      *
-   * {							      *
-   *   // start a transmission in Master transmitter mode     *
-   *   I2C_start(I2C1, 0x77 << 1, I2C_Direction_Transmitter); *
-   *   // write one byte to the slave			      *
-   *   I2C_write(I2C1, 0xD0); // CHIP REGISTER => 0x60	      *
-   *   // stop the transmission				      *
-   *   I2C_stop(I2C1);					      *
-   *   // start a transmission in Master receiver mode	      *
-   *   I2C_start(I2C1, 0x77 << 1, I2C_Direction_Receiver);    *
-   *   // read one byte and request another byte	      *
-   *   received_data[0] = I2C_read_nack(I2C1);		      *
-   * }							      *
-   ************************************************************/
+  /*
+   * if (initBME280(&bme))
+   *   _exit(1);
+   *
+   * retrieve_data(&bme);
+   */
 
-  /* LCD initialization */
-  /******************************************************************************************
-   * LCD_Init();									    *
-   * /\* LCD Layer initialization *\/							    *
-   * LCD_LayerInit();									    *
-   * 											    *
-   * // Enable Layer1									    *
-   * //LTDC_LayerCmd(LTDC_Layer1, ENABLE);						    *
-   * //LTDC_LayerCmd(LTDC_Layer2, DISABLE);						    *
-   * //LTDC_ReloadConfig(LTDC_IMReload);						    *
-   * 											    *
-   * /\* Enable the LTDC *\/								    *
-   * LTDC_Cmd(ENABLE);									    *
-   * 											    *
-   * LCD_SetLayer(LCD_FOREGROUND_LAYER);						    *
-   * // Dokunmatik panel ayarlari							    *
-   * TP_Config();									    *
-   * // Baslangiçta tanitim yazisini göster						    *
-   * LCD_SetFont(&Font16x24);								    *
-   * 											    *
-   * LCD_SetTextColor(LCD_COLOR_BLACK);							    *
-   * LCD_DisplayStringLine (LINE(0),(uint8_t*)"Direnc Renk Kod");// Direnç yazisini temizle *
-   * LCD_DisplayStringLine (LINE(1),(uint8_t*)"  Hesaplayici  ");// 2. rengi temizle	    *
-   * LCD_DisplayStringLine (LINE(2),(uint8_t*)"     V1.0      ");// 3. rengi temzile	    *
-   * LCD_DisplayStringLine (LINE(3),(uint8_t*)" Erhan YILMAZ  ");// 4. rengi temizle	    *
-   * int i;										    *
-   * for(i=100000000; i>0;i--);								    *
-   * for(i=0;i<4;i++)									    *
-   *   LCD_ClearLine(LINE(i));								    *
-   * 											    *
-   * while (1);										    *
-   * char *text = "totoi";								    *
-   * while (1)										    *
-   * {											    *
-   *   //char a = 'a';									    *
-   *   //LCD_DisplayStringLine(LINE(4), (uint8_t*)text);				    *
-   *   LCD_SetFont(&Font8x8);								    *
-   *   LCD_SetTextColor(LCD_COLOR_CYAN);						    *
-   *   LCD_DisplayStringLine(LINE(23), (uint8_t*)text);					    *
-   *   delay(100000);									    *
-   * }											    *
-   ******************************************************************************************/
+  // LCD Configuration
+  LCD_Config();
 
+  // Enable Layer1
+  LTDC_LayerCmd(LTDC_Layer1, ENABLE);
 
-  while (1);
+  // Reload configuration of Layer1
+  LTDC_ReloadConfig(LTDC_IMReload);
+
+  // Enable The LCD
+  LTDC_Cmd(ENABLE);
+
+  LTDC_LayerPosition(LTDC_Layer1, 120, 100);
+  LTDC_ReloadConfig(LTDC_IMReload);
+  int n;
+  for (n = 255; n > 0; n--) {
+    LCD_SetTransparency(n);
+    LTDC_ReloadConfig(LTDC_IMReload);
+    delay(300);
+  }
+  while(1)
+  {
+  }
+
 }
 
 void _start(void)
