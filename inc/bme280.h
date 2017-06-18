@@ -1,3 +1,6 @@
+#ifndef BME280_H
+#define BME280_H
+
 #include <stm32f4xx.h>
 
 #define CHIP_ID 0x60
@@ -42,3 +45,5 @@ void getPressure(struct BME280 *bme);
 void getHumidity(struct BME280 *bme);
 void calibrateBME280(struct BME280 *bme);
 void retrieve_data(struct BME280 *bme);
+
+#endif

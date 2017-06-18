@@ -16,11 +16,8 @@
 
 #undef errno
 extern int errno;
-
-extern sFONT *LCD_Currentfonts;
-void LCD_Config(void);
-void LCD_AF_GPIOConfig(void);
-void delay(__IO uint32_t nCount);
+extern struct timer_led *ptimer_led;
+extern struct timer_bme280 *ptimer_bme;
 
 void _exit(int ret)
 {
@@ -29,45 +26,28 @@ void _exit(int ret)
 
 int main()
 {
-  LEDsInit();
-  ButtonInit();
-  TimerInit();
-
-  init_I2C1();
-
   struct BME280 bme;
 
-  /*
-   * if (initBME280(&bme))
-   *   _exit(1);
-   *
-   * retrieve_data(&bme);
-   */
+  struct timer_led t_led;
+  t_led.run = &LEDToggle;
 
-  // LCD Configuration
-  LCD_Config();
+  struct timer_bme280 t_bme;
+  t_bme.run = &retrieve_data;
+  t_bme.param = &bme;
 
-  // Enable Layer1
-  LTDC_LayerCmd(LTDC_Layer1, ENABLE);
+  LEDsInit();
+  ButtonInit();
 
-  // Reload configuration of Layer1
-  LTDC_ReloadConfig(LTDC_IMReload);
+  init_I2C1();
+  if (initBME280(&bme))
+    _exit(1);
 
-  // Enable The LCD
-  LTDC_Cmd(ENABLE);
+  ptimer_led = &t_led;
+  ptimer_bme = &t_bme;
+  TimerInit();
 
-  LTDC_LayerPosition(LTDC_Layer1, 120, 100);
-  LTDC_ReloadConfig(LTDC_IMReload);
-  int n;
-  for (n = 255; n > 0; n--) {
-    LCD_SetTransparency(n);
-    LTDC_ReloadConfig(LTDC_IMReload);
-    delay(300);
-  }
-  while(1)
-  {
-  }
 
+  while(1);
 }
 
 void _start(void)
