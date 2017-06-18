@@ -1,4 +1,8 @@
 #include <button.h>
+#include <int.h>
+
+extern struct int_bme280 *pint_bme;
+extern struct int_led *pint_led;
 
 void ButtonInit(void)
 {
@@ -42,7 +46,10 @@ void EXTI0_IRQHandler(void)
 {
   //Check if EXTI_Line0 is asserted
   if(EXTI_GetITStatus(EXTI_Line0) != RESET)
-    LEDToggle(GPIO_Pin_13);
+  {
+    pint_led->run(GPIO_Pin_13);
+    pint_bme->run(pint_bme->param);
+  }
 
   //we need to clear line pending bit manually
   EXTI_ClearITPendingBit(EXTI_Line0);

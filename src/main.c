@@ -2,6 +2,7 @@
 #include <stm32f4xx_exti.h>
 #include <stm32f4xx_rcc.h>
 #include <stm32f4xx_gpio.h>
+#include <stm32f4xx_pwr.h>
 #include <stm32f429i_discovery.h>
 #include <stm32f429i_discovery_lcd.h>
 
@@ -13,11 +14,12 @@
 #include <button.h>
 #include <led.h>
 #include <bme280.h>
+#include <int.h>
 
 #undef errno
 extern int errno;
-extern struct timer_led *ptimer_led;
-extern struct timer_bme280 *ptimer_bme;
+extern struct int_led *pint_led;
+extern struct int_bme280 *pint_bme;
 
 void _exit(int ret)
 {
@@ -28,12 +30,14 @@ int main()
 {
   struct BME280 bme;
 
-  struct timer_led t_led;
+  struct int_led t_led;
   t_led.run = &LEDToggle;
 
-  struct timer_bme280 t_bme;
+  struct int_bme280 t_bme;
   t_bme.run = &retrieve_data;
   t_bme.param = &bme;
+  pint_led = &t_led;
+  pint_bme = &t_bme;
 
   LEDsInit();
   ButtonInit();
@@ -42,12 +46,13 @@ int main()
   if (initBME280(&bme))
     _exit(1);
 
-  ptimer_led = &t_led;
-  ptimer_bme = &t_bme;
   TimerInit();
 
 
-  while(1);
+  while(1)
+  {
+    //PWR_EnterSTOPMode(PWR_MainRegulator_ON, PWR_STOPEntry_WFI);
+  }
 }
 
 void _start(void)

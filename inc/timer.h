@@ -7,17 +7,6 @@
 #include <stm32f4xx_gpio.h>
 #include <bme280.h>
 
-struct timer_bme280
-{
-  void (*run)(struct BME280 *param);
-  void *param;
-};
-
-struct timer_led
-{
-  void (*run)(unsigned int n);
-};
-
 void TimerInit(void);
 void TIM2_IRQHandler(void);
 

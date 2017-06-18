@@ -1,8 +1,9 @@
 #include <timer.h>
+#include <int.h>
 #include <led.h>
 
-struct timer_led *ptimer_led;
-struct timer_bme280 *ptimer_bme;
+extern struct int_led *pint_led;
+extern struct int_bme280 *pint_bme;
 
 void TimerInit(void)
 {
@@ -37,8 +38,8 @@ void TIM2_IRQHandler(void)
 {
   if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
   {
-    ptimer_led->run(GPIO_Pin_13);
-    ptimer_bme->run(ptimer_bme->param);
+    pint_led->run(GPIO_Pin_13);
+    pint_bme->run(pint_bme->param);
   }
 
   TIM_ClearITPendingBit(TIM2, TIM_IT_Update);

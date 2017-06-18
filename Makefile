@@ -33,6 +33,7 @@ SRC=$(addprefix $(SRCDIR)/,      \
     stm32f4xx_ltdc.c             \
     stm32f4xx_dma2d.c            \
     stm32f4xx_tim.c              \
+    stm32f4xx_pwr.c              \
     misc.c                       \
     stm32f4xx_i2c.c              \
     i2c1.c \
