@@ -26,6 +26,12 @@ void _exit(int ret)
   while (1);
 }
 
+int f(void)
+{
+  int i = 0;
+  return i;
+}
+
 int main()
 {
   struct BME280 bme;
@@ -51,7 +57,8 @@ int main()
 
   while(1)
   {
-    //PWR_EnterSTOPMode(PWR_MainRegulator_ON, PWR_STOPEntry_WFI);
+    // Enter sleep mode
+    __WFI();
   }
 }
 
