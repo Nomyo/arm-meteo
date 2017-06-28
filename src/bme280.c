@@ -73,14 +73,14 @@ void calibrateBME280(struct BME280 *bme)
 
   I2C_start(I2C1, BME280_I2C_ADDR, I2C_Direction_Receiver);
 
-  for (i = 1; i < 16; ++i)
+  for (i = 1; i < 6; ++i)
     data[i] = I2C_read_ack(I2C1);
   data[i] = I2C_read_nack(I2C1);
 
   bme->dig_H1 = data[0];
   bme->dig_H2 = (data[2] << 8) | data[1];
   bme->dig_H3 = data[3];
-  bme->dig_H4 = (data[4] << 4) | (data[5] & 0x0f);
+  bme->dig_H4 = (data[4] << 4) | ((data[5]) & 0x0f);
   bme->dig_H5 = (data[6] << 8) | ((data[5] >> 4) & 0x0f);
   bme->dig_H6 = data[7];
 }
@@ -122,8 +122,8 @@ void getPressure(struct BME280 *bme)
   int32_t var1 = 0;
   int32_t var2 = 0;
   uint32_t press = 0;
-  int32_t adc_P = 0;
-  char data[3];
+  uint32_t adc_P = 0;
+  uint8_t data[3];
   int i = 0;
 
   I2C_start(I2C1, BME280_I2C_ADDR, I2C_Direction_Transmitter);

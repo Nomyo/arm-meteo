@@ -26,12 +26,6 @@ void _exit(int ret)
   while (1);
 }
 
-int f(void)
-{
-  int i = 0;
-  return i;
-}
-
 int main()
 {
   struct BME280 bme;

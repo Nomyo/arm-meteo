@@ -12,10 +12,13 @@
 struct BME280
 {
   uint16_t dig_T1;
+  uint16_t dig_P1;
+  uint16_t dig_H1;
+  uint16_t dig_H3;
+
   int16_t dig_T2;
   int16_t dig_T3;
 
-  uint8_t dig_P1;
   int16_t dig_P2;
   int16_t dig_P3;
   int16_t dig_P4;
@@ -25,9 +28,7 @@ struct BME280
   int16_t dig_P8;
   int16_t dig_P9;
 
-  uint8_t  dig_H1;
   int16_t  dig_H2;
-  uint8_t  dig_H3;
   int16_t  dig_H4;
   int16_t  dig_H5;
   int8_t   dig_H6;
@@ -35,7 +36,7 @@ struct BME280
   int32_t t_fine;
 
   long temperature;
-  long pressure;
+  int32_t pressure;
   long humidity;
 };
 

@@ -20,8 +20,8 @@ void TimerInit(void)
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
   /* Time base configuration */
-  TIM_TimeBaseStructure.TIM_Period = 500; // 1 MHz down to 1 KHz (1 ms)
-  TIM_TimeBaseStructure.TIM_Prescaler = 40000; // 24 MHz Clock down to 1 MHz (adjust per your clock)
+  TIM_TimeBaseStructure.TIM_Period = 500;
+  TIM_TimeBaseStructure.TIM_Prescaler = 40000;
   TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
