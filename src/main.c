@@ -29,33 +29,30 @@ void _exit(int ret)
 
 int main()
 {
-  /*
-   * struct BME280 bme;
-   *
-   * struct int_led t_led;
-   * t_led.run = &LEDToggle;
-   *
-   * struct int_bme280 t_bme;
-   * t_bme.run = &retrieve_data;
-   * t_bme.param = &bme;
-   * pint_led = &t_led;
-   * pint_bme = &t_bme;
-   *
-   * LEDsInit();
-   * ButtonInit();
-   *
-   * init_I2C1();
-   * if (initBME280(&bme))
-   *   _exit(1);
-   *
-   * TimerInit();
-   */
+  struct BME280 bme;
+
+  struct int_led t_led;
+  t_led.run = &LEDToggle;
+
+  struct int_bme280 t_bme;
+  t_bme.run = &retrieve_data;
+  t_bme.param = &bme;
+  pint_led = &t_led;
+  pint_bme = &t_bme;
+
+  LEDsInit();
+  ButtonInit();
+
+  init_I2C1();
+  if (initBME280(&bme))
+    _exit(1);
+
+  TimerInit();
 
   UART6_config();
 
   while(1)
   {
-    //UART_putstring("Hello, World!\r\n");
     //Enter sleep mode
     __WFI();
   }

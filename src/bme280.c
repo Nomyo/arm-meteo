@@ -1,5 +1,6 @@
 #include <i2c1.h>
 #include <bme280.h>
+#include <uart.h>
 
 void calibrateBME280(struct BME280 *bme)
 {
@@ -202,6 +203,8 @@ void retrieve_data(struct BME280 *bme)
   getTemperature(bme);
   getPressure(bme);
   getHumidity(bme);
+
+  UART_printbme(bme);
 }
 
 int initBME280(struct BME280 *bme)
