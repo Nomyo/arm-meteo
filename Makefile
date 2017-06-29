@@ -24,6 +24,7 @@ OBJDIR=obj
 
 SRC=$(addprefix $(SRCDIR)/,      \
     main.c                       \
+    glo.S  \
     stm32f4xx_rcc.c              \
     stm32f4xx_gpio.c             \
     stm32f4xx_exti.c             \
@@ -41,6 +42,7 @@ SRC=$(addprefix $(SRCDIR)/,      \
     timer.c                      \
     button.c                     \
     systick.c                    \
+    uart.c                       \
     fonts.c                      \
     bme280.c                     \
     stm32f4xx_usart.c            \
@@ -50,7 +52,8 @@ SRC=$(addprefix $(SRCDIR)/,      \
     stm32f429i_discovery_ioe.c   \
     ltd.c)
 
-OBJ=$(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o, $(SRC))
+OBJ1=$(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o, $(SRC))
+OBJ=$(patsubst $(SRCDIR)/%.S,$(OBJDIR)/%.o, $(OBJ1))
 BIN=bin
 
 all:

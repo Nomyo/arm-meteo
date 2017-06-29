@@ -15,6 +15,7 @@
 #include <led.h>
 #include <bme280.h>
 #include <int.h>
+#include <uart.h>
 
 #undef errno
 extern int errno;
@@ -28,36 +29,54 @@ void _exit(int ret)
 
 int main()
 {
-  struct BME280 bme;
+  /*
+   * struct BME280 bme;
+   *
+   * struct int_led t_led;
+   * t_led.run = &LEDToggle;
+   *
+   * struct int_bme280 t_bme;
+   * t_bme.run = &retrieve_data;
+   * t_bme.param = &bme;
+   * pint_led = &t_led;
+   * pint_bme = &t_bme;
+   *
+   * LEDsInit();
+   * ButtonInit();
+   *
+   * init_I2C1();
+   * if (initBME280(&bme))
+   *   _exit(1);
+   *
+   * TimerInit();
+   */
 
-  struct int_led t_led;
-  t_led.run = &LEDToggle;
-
-  struct int_bme280 t_bme;
-  t_bme.run = &retrieve_data;
-  t_bme.param = &bme;
-  pint_led = &t_led;
-  pint_bme = &t_bme;
-
-  LEDsInit();
-  ButtonInit();
-
-  init_I2C1();
-  if (initBME280(&bme))
-    _exit(1);
-
-  TimerInit();
-
+  UART6_config();
 
   while(1)
   {
-    // Enter sleep mode
+    //UART_putstring("Hello, World!\r\n");
+    //Enter sleep mode
     __WFI();
   }
 }
 
+extern int _data_lma_gloppy;
+extern int _data_vma_gloppy;
+extern int _data_size_gloppy;
+
 void _start(void)
 {
+  char *data_load_addr = (char *)_data_lma_gloppy;
+  char *data_virtual_addr = (char *)_data_vma_gloppy;
+  int data_size = _data_size_gloppy;
+
+  int i = 0;
+  //  memcpy (_data_vma, _data_lma, _data_size)
+
+  for (; i + _data_vma_gloppy <= data_size; ++i)
+    data_virtual_addr[i] = data_load_addr[i];
+
   main();
 }
 

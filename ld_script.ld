@@ -21,6 +21,8 @@ SECTIONS
 		. = ALIGN(4);
 	} >FLASH
 
+	_stext = .;
+
 	.text :
 	{
 		. = ALIGN(4);
@@ -31,23 +33,23 @@ SECTIONS
 		*(.glue_7)
 		*(.glue_7t)
 		*(.eh_frame)
+		*(_gloppy)
 		KEEP (*(.init))
 		KEEP (*(.fini))
 		. = ALIGN(4);
-	} >FLASH
+	} > FLASH
 
-	_sidata = .;
+	_etext = .;
 
 	.data :
 	{
-		. = ALIGN(4);
-		_sdata = .;
+		_data_lma = LOADADDR(.data);
+		_data_vma = .;
 		*(.data)
 		*(.data*)
 		*(.romtext)
-		. = ALIGN(4);
-		_edata = .;
-	} >RAM AT>FLASH
+		_data_size = SIZEOF (.data);
+	} > RAM AT > FLASH
 
 	. = ALIGN(4);
 
